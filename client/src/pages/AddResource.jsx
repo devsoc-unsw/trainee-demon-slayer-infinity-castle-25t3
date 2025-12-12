@@ -1,61 +1,47 @@
-// client/src/pages/AddResource.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'; // Import Leaflet tools
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import '../Auth.css';
 
-// Handles clicking on the map 
+// Helper for map
 function LocationPicker({ setCoordinates }) {
   useMapEvents({
     click(e) {
-      // When user clicks the map, grab the Lat/Lng
-      setCoordinates({
-        lat: e.latlng.lat,
-        lng: e.latlng.lng
-      });
+      setCoordinates({ lat: e.latlng.lat, lng: e.latlng.lng });
     },
   });
-  return null; // doesn't render anything 
+  return null;
 }
 
 function AddResource() {
   const navigate = useNavigate();
 
-  // 1. Form State
+ // States
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Toilet', // Default
-    customCategory: '', // Used if "Other" is selected
+    category: 'Toilet',
+    customCategory: '',
     building: '',
     level: '',
     description: '',
   });
-
-  // 2. Location State
-  const [coordinates, setCoordinates] = useState({ lat: -33.9173, lng: 151.2313 }); // Default: UNSW Library
+  const [coordinates, setCoordinates] = useState({ lat: -33.9173, lng: 151.2313 });
   const [usingMyLocation, setUsingMyLocation] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
-
-  // 3. Image State
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // Handle user changes
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // Handle Image Selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
-      // Create a fake URL to preview the image immediately
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  // Handle GPS Button
   const handleGpsClick = () => {
     setLoadingLocation(true);
     if ("geolocation" in navigator) {
@@ -72,35 +58,23 @@ function AddResource() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Logic: If category is "Other", use the custom text. Otherwise use the dropdown.
-    const finalCategory = formData.category === 'Other' ? formData.customCategory : formData.category;
-
-    const finalData = {
-      ...formData,
-      category: finalCategory,
-      location: coordinates,
-      image: imageFile ? imageFile.name : "No Image" // TODO, handling image uploads
-    };
-
-    console.log("Submitting:", finalData);
-    alert("Resource Added!");
+    alert("Resource added");
     navigate('/map');
   };
 
   return (
-    <div className="auth-container" style={{height: 'auto', padding: '50px 0'}}>
-      <div className="auth-form" style={{ maxWidth: '600px' }}>
-        <h2 className="auth-title">Add New Resource</h2>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
+      <div className="bg-white w-full max-w-2xl p-8 rounded-xl shadow-lg">
+        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Add New Resource</h2>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* --- CATEGORY SECTION --- */}
-          <div className="form-group">
-            <label>Category</label>
+          {/* Category of the resource */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Category</label>
             <select 
               name="category" 
-              className="form-input" 
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" 
               value={formData.category} 
               onChange={handleChange}
             >
@@ -110,18 +84,17 @@ function AddResource() {
               <option value="Vending">Vending Machine</option>
               <option value="Wifi">Wifi Spot</option>
               <option value="Outlet">Power Outlet</option>
-              <option value="StudySpot">Study Spot</option>
               <option value="Other">Other</option>
             </select>
           </div>
 
-          {/* Conditional Input: Only shows if "Other" is selected */}
+          {/* Other input*/}
           {formData.category === 'Other' && (
-            <div className="form-group">
+            <div>
               <input 
                 type="text" 
                 name="customCategory" 
-                className="form-input" 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
                 placeholder="What type of resource is this?"
                 onChange={handleChange}
                 required
@@ -129,115 +102,115 @@ function AddResource() {
             </div>
           )}
 
-          {/* --- DETAILS SECTION --- */}
-          <div className="form-group">
-            <label>Name / Description</label>
-            <input type="text" name="name" className="form-input" placeholder="e.g. Group Study Spot" onChange={handleChange} required />
+          {/* Name */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Name / Description</label>
+            <input 
+              type="text" 
+              name="name" 
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+              placeholder="e.g. Quiet Study Nook" 
+              onChange={handleChange} 
+              required 
+            />
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label>Building</label>
-              <input type="text" name="building" className="form-input" placeholder="e.g. Quad" onChange={handleChange} />
+          {/* Building and level*/}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-gray-700 font-medium mb-2">Building</label>
+              <input 
+                type="text" 
+                name="building" 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                placeholder="e.g. Quad" 
+                onChange={handleChange} 
+              />
             </div>
-            <div className="form-group" style={{ width: '100px' }}>
-              <label>Level</label>
-              <input type="text" name="level" className="form-input" placeholder="" onChange={handleChange} />
+            <div className="w-24">
+              <label className="block text-gray-700 font-medium mb-2">Level</label>
+              <input 
+                type="text" 
+                name="level" 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                placeholder="Lvl" 
+                onChange={handleChange} 
+              />
             </div>
           </div>
 
-          {/* --- PHOTO UPLOAD SECTION --- */}
-          <div className="form-group">
-            <label style={{ marginBottom: '8px', display: 'block' }}>Add a Photo</label>
-            
-            {/* 1. Real Input (Hidden) */}
+          {/* Uploading photos */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Add a Photo</label>
             <input 
               type="file" 
               id="hidden-file-input" 
               accept="image/*" 
               onChange={handleImageChange}
-              style={{ display: 'none' }} // Hides default button
+              className="hidden" 
             />
-
-            {/* 2. The Custom Button (Label) */}
+            
             <label 
               htmlFor="hidden-file-input" 
-              className="form-input"
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                cursor: 'pointer',
-                backgroundColor: '#f8f9fa',
-                border: '2px dashed #cbd5e1', 
-                padding: '20px',
-                textAlign: 'center',
-                color: '#64748b'
-              }}
+              className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
             >
-              {/* Change text based on whether file is selected */}
               {imageFile ? (
-                <span style={{ color: '#2563EB', fontWeight: 'bold' }}>
-                   📸 {imageFile.name} (Click to change)
+                <span className="text-blue-600 font-semibold flex items-center gap-2">
+                   📸 {imageFile.name}
                 </span>
               ) : (
-                <span>Click to Upload Image</span>
+                <div className="flex flex-col items-center pt-5 pb-6">
+                    <p className="text-sm text-gray-500 font-semibold">Click to upload image</p>
+                    <p className="text-xs text-gray-400">SVG, PNG, JPG (MAX. 800x400px)</p>
+                </div>
               )}
             </label>
 
-            {/* 3. The Preview */}
             {imagePreview && (
-              <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                <img 
-                  src={imagePreview} 
-                  alt="Preview" 
-                  style={{ maxHeight: '150px', borderRadius: '8px', border: '1px solid #ddd', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }} 
-                />
+              <div className="mt-4 flex justify-center">
+                <img src={imagePreview} alt="Preview" className="max-h-40 rounded-lg shadow-sm border border-gray-200" />
               </div>
             )}
           </div>
 
-          {/* --- LOCATION SECTION (MAP PIN) --- */}
-          <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <label style={{ margin: 0 }}>Pin Location</label>
+          {/* Location on the map */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-gray-700 font-medium">Pin Location</label>
               <button 
                 type="button" 
                 onClick={handleGpsClick}
-                style={{ background: '#2563EB', color: 'white', border: 'none', padding: '5px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                className="bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
               >
                 {loadingLocation ? "Locating..." : "Use My Location"}
               </button>
             </div>
+            <p className="text-xs text-gray-500 mb-2">Tap the map to choose location manually.</p>
 
-            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
-              Tap on the map to place the marker exactly where the item is.
-            </p>
-
-            {/* MINI MAP */}
-            <div style={{ height: '300px', borderRadius: '12px', overflow: 'hidden', border: '2px solid #eee' }}>
-              <MapContainer 
-                center={[-33.9173, 151.2313]} 
-                zoom={17} 
-                style={{ height: "100%", width: "100%" }}
-              >
+            <div className="h-64 w-full rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner z-0 relative">
+              <MapContainer center={[-33.9173, 151.2313]} zoom={17} style={{ height: "100%", width: "100%" }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                
-                {/* Visual Marker showing selection */}
                 <Marker position={[coordinates.lat, coordinates.lng]} />
-                
-                {/* Invisible helper detecting clicks */}
                 <LocationPicker setCoordinates={setCoordinates} />
               </MapContainer>
             </div>
-            
-            <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '5px', textAlign: 'right' }}>
-              Selected: {coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)}
+            <p className="text-xs text-right text-gray-400 mt-1">
+              Lat: {coordinates.lat.toFixed(5)}, Lng: {coordinates.lng.toFixed(5)}
             </p>
           </div>
 
-          <button type="submit" className="auth-button">Submit Resource</button>
-          <Link to="/ " className="auth-link" style={{color: '#666'}}>Cancel</Link>
+          {/* Buttons */}
+          <div className="pt-4 flex flex-col gap-3">
+            <button 
+                type="submit" 
+                className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md"
+            >
+                Submit Resource
+            </button>
+            <Link to="/" className="block text-center text-gray-500 hover:text-gray-700 font-medium">
+                Cancel
+            </Link>
+          </div>
 
         </form>
       </div>
